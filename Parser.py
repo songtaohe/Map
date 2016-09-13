@@ -59,8 +59,27 @@ for key, value in waydict.iteritems():
 
 
 plt.axes().set_aspect('equal','datalim')
-plt.xlim([minlon,maxlon])
-plt.ylim([minlat,maxlat])
+#plt.xlim([minlon,maxlon])
+#plt.ylim([minlat,maxlat])
+
+
+#Read Route Trace
+
+value = open('trace').read().split()
+
+gpsx = []
+gpsy = []
+
+for i in range(len(value)) :
+	if i % 3 == 1 : gpsx.append(float(value[i]))
+	if i % 3 == 2 : gpsy.append(float(value[i]))
+
+plt.plot(gpsy,gpsx,'ro')
+plt.plot(gpsy,gpsx,'r')
+
+
+
+
 plt.show()
 
 
