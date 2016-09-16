@@ -42,6 +42,8 @@ struct Link
 
 struct Node* TestInsert(struct Node* root, double minx,double miny, double maxx, double maxy, int key);
 double LeastEnlargement(struct Rect target, struct Rect cur);
+void Dump(struct Node* cur);
+
 int Overlay(struct Rect r1, struct Rect r2)
 {
 	int ox = 1;
@@ -90,8 +92,11 @@ __attribute__((__visibility__("default"))) void PythonInsert(double minx,double 
 
 		PythonInit = 1;
 	}	
+	//printf("Debug1\n");
 
 	PythonRoot = TestInsert(PythonRoot,minx,miny,maxx,maxy,key);
+	//printf("Debug2\n");
+	//Dump(PythonRoot);
 }
 
 int PythonQueryRecursive(struct Node* node, double minx, double miny, double maxx, double maxy)
@@ -104,20 +109,32 @@ int PythonQueryRecursive(struct Node* node, double minx, double miny, double max
 	r.MaxY = maxy;
 
 	if(node == NULL) return 0;
+	//printf("Node %p\n",node);
 	if(node->IsLeaf) 
 	{
-		if(LeastEnlargement(node->R,r) == 0)
+		//printf("-->%d\n",node->NumC);
+		for(int i = 0;i<node->NumC;i++)
 		{
-			ret = 1;
-			PythonLinkCur->key = node->key;
-			if(PythonLinkCur->next == NULL)
+			//if(node->C[i] == NULL) printf("Error\n");
+			if(LeastEnlargement(r,node->C[i]->R) == 0)
 			{
-				PythonLinkCur->next = (struct Link*)malloc(sizeof(struct Link));
-				PythonLinkCur = PythonLinkCur->next;
-			}
-			else
-			{
-				PythonLinkCur = PythonLinkCur->next;
+				ret ++;
+				//printf("Link %p\n",PythonLinkCur);
+
+				PythonLinkCur->key = node->C[i]->key;
+				//printf("Node %p, %d, %d\n",node,i,node->C[i]->key);	
+
+				if(PythonLinkCur->next == NULL)
+				{
+					PythonLinkCur->next = (struct Link*)malloc(sizeof(struct Link));
+					//if(PythonLinkCur->next == NULL) printf("Error!\n");
+					PythonLinkCur = PythonLinkCur->next;
+					PythonLinkCur->next = NULL;
+				}
+				else
+				{
+					PythonLinkCur = PythonLinkCur->next;
+				}
 			}
 		}					
 	}
@@ -125,6 +142,7 @@ int PythonQueryRecursive(struct Node* node, double minx, double miny, double max
 	{
 		for(int i = 0; i< node->NumC; i++)
 		{
+			//if(node->C[i] == NULL) printf("Error\n");
 			if(Overlay(node->C[i]->R,r))
 			{
 				ret += PythonQueryRecursive(node->C[i], minx, miny, maxx, maxy);
@@ -255,6 +273,7 @@ struct Node* Split(struct Node* cur, struct Node* new)
 		newRoot->C[0] = cur;
 		newRoot->C[1] = new;
 		newRoot->IsLeaf = 0;
+		newRoot->F = NULL;
 
 		LocalUpdateRect(newRoot);		
 
@@ -290,14 +309,18 @@ struct Node * Insert(struct Node* root,struct Rect newRect, int newKey)
 {
 	struct Node* L = ChooseLeaf(root, newRect);
 
+	//printf("Mark1\n");
 	if(L->NumC < _M_)
 	{
 		L->C[L->NumC] = (struct Node*)malloc(sizeof(struct Node));
 		L->C[L->NumC]->R = newRect;
 		L->C[L->NumC]->key = newKey;
+		//printf("newkey%d %p %d\n",newKey,L,L->NumC);
 		L->NumC ++;
 
+	//printf("Mark2\n");
 		UpdateRect(L, newRect);
+	//printf("Mark3\n");
 		return root;
 	}
 	else
@@ -326,13 +349,23 @@ void Dump(struct Node* cur)
 	
 	printf("\nNode %p   [%.2lf, %.2lf, %.2lf, %.2lf]\n", cur,
 						cur->R.MinX, cur->R.MinY, cur->R.MaxX, cur->R.MaxY);
+	
+	//printf("%d\n",cur->NumC);
 	for(int i = 0;i < cur->NumC; i++)
 	{
-		struct Rect R = cur->C[i]->R;
+		struct Rect R;
+		if(cur->C[i] == NULL)
+		{
+			printf("\nStructure Incomplete\n");
+			continue;
+		}
+
+		R  = cur->C[i]->R;
 		printf("    -  %p [%.2lf, %.2lf, %.2lf, %.2lf]\n", cur->C[i],
 						R.MinX, R.MinY, R.MaxX, R.MaxY);
 	}
 
+	if(cur->IsLeaf == 0)
 	for(int i = 0;i<cur->NumC;i++)
 	{
 		Dump(cur->C[i]);
