@@ -40,6 +40,21 @@ struct Link
 
 
 struct Node* TestInsert(struct Node* root, double minx,double miny, double maxx, double maxy, void* key);
+double LeastEnlargement(struct Rect target, struct Rect cur);
+int Overlay(struct Rect r1, struct Rect r2)
+{
+	int ox = 1;
+	int oy = 1;
+
+	if(r1.MinX > r2.MaxX) ox = 0;
+	if(r2.MinX > r1.MaxX) ox = 0;
+
+	if(r1.MinY > r2.MaxY) oy = 0;
+	if(r2.MinY > r1.MaxY) oy = 0;
+
+	return ox*oy;
+}
+
 
 struct Node * PythonRoot = NULL;
 struct Link * PythonLinkHead = NULL;
@@ -48,7 +63,7 @@ int PythonInit = 0;
 
 __attribute__((__visibility__("default"))) void PythonInsert(double minx,double miny,double maxx, double maxy, int key)
 {
-	if(PythonInit == 0)
+	if(PythonInit == 0) // Initialization
 	{
 		PythonRoot = (struct Node*)malloc(sizeof(struct Node));
 
@@ -78,10 +93,57 @@ __attribute__((__visibility__("default"))) void PythonInsert(double minx,double 
 	PythonRoot = TestInsert(PythonRoot,minx,miny,maxx,maxy,key);
 }
 
+int PythonQueryRecursive(struct Node* node, double minx, double miny, double maxx, double maxy)
+{
+	struct Rect r;
+	int ret = 0;
+	r.MinX = minx;
+	r.MinY = miny;
+	r.MaxX = maxx;
+	r.MaxY = maxy;
+
+	if(node == NULL) return;
+	if(node->IsLeaf) 
+	{
+		if(LeaseEnlargement(node->R,r) == 0)
+		{
+			ret = 1;
+			PythonLinkCur->key = node->key;
+			if(PythonLinkCur->next == NULL)
+			{
+				PythonLinkCur->next = (struct Link*)malloc(sizeof(struct Link));
+				PythonLinkCur = PythonLinkCur->next;
+			}
+			else
+			{
+				PythonLinkCur = PythonLinkCur->next;
+			}
+		}					
+	}
+	else
+	{
+		for(int i = 0; i< node->NumC; i++)
+		{
+			if(Overlay(node->R,r))
+			{
+				ret+=
+			} 
+
+		}		
+	}
+
+
+}
+
+
 __attribute__((__visibility__("default"))) int PythonQuery(double minx,double miny, double maxx, double maxy)
 {
+	int ret = 0;
 	PythonLinkCur = &PythonLinkHead;
 	//TODO
+	
+
+
 
 
 }
