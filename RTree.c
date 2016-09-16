@@ -30,6 +30,80 @@ struct Node
 };
 
 
+
+
+struct Link
+{
+	struct Link* next;
+	int key;
+};
+
+
+struct Node* TestInsert(struct Node* root, double minx,double miny, double maxx, double maxy, void* key);
+
+struct Node * PythonRoot = NULL;
+struct Link * PythonLinkHead = NULL;
+struct Link * PythonLinkCur = NULL;
+int PythonInit = 0;
+
+__attribute__((__visibility__("default"))) void PythonInsert(double minx,double miny,double maxx, double maxy, int key)
+{
+	if(PythonInit == 0)
+	{
+		PythonRoot = (struct Node*)malloc(sizeof(struct Node));
+
+	    PythonRoot->R.MinX = -1;
+    	PythonRoot->R.MinY = -1;
+    	PythonRoot->R.MaxX = 1;
+    	PythonRoot->R.MaxY = 1;
+
+    	PythonRoot->F = NULL;
+    	for(int i = 0;i < _M_; i++) PythonRoot->C[i] = NULL;
+
+
+    	PythonRoot->NumC = 0;
+    	PythonRoot->key = NULL;
+    	PythonRoot->IsLeaf = 1;
+
+		PythonLinkHead = (struct Link*)malloc(sizeof(struct Link));		
+		PythonLinkHead->next = NULL;
+		PythonLinkHead->key = -1;
+
+		PythonLinkCur = PythonLinkHead;
+
+
+		PythonInit = 1;
+	}	
+
+	PythonRoot = TestInsert(PythonRoot,minx,miny,maxx,maxy,key);
+}
+
+__attribute__((__visibility__("default"))) int PythonQuery(double minx,double miny, double maxx, double maxy)
+{
+	PythonLinkCur = &PythonLinkHead;
+	//TODO
+
+
+}
+
+
+__attribute__((__visibility__("default"))) int PythonReadKey()
+{
+	int ret = -1;
+	if(PythonLinkCur != NULL) 
+	{
+		ret = PythonLinkCur->key;
+		PythonLinkCur = PythonLinkCur->next;
+	}
+
+	return ret;
+}
+
+
+
+
+
+
 double LeastEnlargement(struct Rect target, struct Rect cur)
 {
 	double f = 0;
