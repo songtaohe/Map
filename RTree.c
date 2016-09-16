@@ -26,7 +26,8 @@ struct Node
 	struct Node* C[_M_];	
 	int NumC;
 	int IsLeaf;
-	void* key;
+	//void* key;
+	int key;
 };
 
 
@@ -39,7 +40,7 @@ struct Link
 };
 
 
-struct Node* TestInsert(struct Node* root, double minx,double miny, double maxx, double maxy, void* key);
+struct Node* TestInsert(struct Node* root, double minx,double miny, double maxx, double maxy, int key);
 double LeastEnlargement(struct Rect target, struct Rect cur);
 int Overlay(struct Rect r1, struct Rect r2)
 {
@@ -77,7 +78,7 @@ __attribute__((__visibility__("default"))) void PythonInsert(double minx,double 
 
 
     	PythonRoot->NumC = 0;
-    	PythonRoot->key = NULL;
+    	PythonRoot->key = -1;
     	PythonRoot->IsLeaf = 1;
 
 		PythonLinkHead = (struct Link*)malloc(sizeof(struct Link));		
@@ -102,10 +103,10 @@ int PythonQueryRecursive(struct Node* node, double minx, double miny, double max
 	r.MaxX = maxx;
 	r.MaxY = maxy;
 
-	if(node == NULL) return;
+	if(node == NULL) return 0;
 	if(node->IsLeaf) 
 	{
-		if(LeaseEnlargement(node->R,r) == 0)
+		if(LeastEnlargement(node->R,r) == 0)
 		{
 			ret = 1;
 			PythonLinkCur->key = node->key;
@@ -124,28 +125,28 @@ int PythonQueryRecursive(struct Node* node, double minx, double miny, double max
 	{
 		for(int i = 0; i< node->NumC; i++)
 		{
-			if(Overlay(node->R,r))
+			if(Overlay(node->C[i]->R,r))
 			{
-				ret+=
+				ret += PythonQueryRecursive(node->C[i], minx, miny, maxx, maxy);
 			} 
 
 		}		
 	}
 
-
+	return ret;
 }
 
 
 __attribute__((__visibility__("default"))) int PythonQuery(double minx,double miny, double maxx, double maxy)
 {
 	int ret = 0;
-	PythonLinkCur = &PythonLinkHead;
+	PythonLinkCur = PythonLinkHead;
 	//TODO
-	
+	ret = PythonQueryRecursive(PythonRoot,minx,miny,maxx,maxy);		
 
+	PythonLinkCur = PythonLinkHead;
 
-
-
+	return ret;
 }
 
 
@@ -285,7 +286,7 @@ struct Node* Split(struct Node* cur, struct Node* new)
 }
 
 
-struct Node * Insert(struct Node* root,struct Rect newRect, void * newKey)
+struct Node * Insert(struct Node* root,struct Rect newRect, int newKey)
 {
 	struct Node* L = ChooseLeaf(root, newRect);
 
@@ -338,7 +339,7 @@ void Dump(struct Node* cur)
 	}	
 }
 
-struct Node* TestInsert(struct Node* root, double minx,double miny, double maxx, double maxy, void* key)
+struct Node* TestInsert(struct Node* root, double minx,double miny, double maxx, double maxy, int key)
 {
 	struct Rect R;
 	R.MinX = minx;
@@ -366,7 +367,7 @@ void main()
 
 
 	root->NumC = 0;
-	root->key = NULL;	
+	root->key = -1;	
 	root->IsLeaf = 1;
 
 
