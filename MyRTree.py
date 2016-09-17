@@ -27,20 +27,23 @@ class RTree(object):
 
 		return keys
 
+def initRTree():
+	return True
 
-myRTree = RTree('RTree.so')
 
-myRTree.Insert(10,10,20,20,1)
-myRTree.Insert(11,11,50,50,2)
-myRTree.Insert(15,15,16,16,3)
+#myRTree = RTree('RTree.so')
 
-myRTree.Insert(1,1,2,2,4)
-myRTree.Insert(4,4,5,5,5)
-myRTree.Insert(0,0,100,100,6)
+#myRTree.Insert(10,10,20,20,1)
+#myRTree.Insert(11,11,50,50,2)
+#myRTree.Insert(15,15,16,16,3)
+
+#myRTree.Insert(1,1,2,2,4)
+#myRTree.Insert(4,4,5,5,5)
+#myRTree.Insert(0,0,100,100,6)
 
 #print(myRTree.Query(0.5,0.5,8,8))
 #print(myRTree.ReadKey())
 
-print(myRTree.Query(-100,-100,200,200))
+#print(myRTree.Query(-100,-100,200,200))
 
 #code.interact(local=locals())

@@ -1,6 +1,8 @@
 import xml.etree.ElementTree
 import numpy as np
 import matplotlib.pyplot as plt
+import code
+from MyRTree import RTree
 
 roadForMotorDict = {'motorway','trunk','primary','secondary','tertiary','unclassified','residential','service'}
 
@@ -36,6 +38,13 @@ maxlon = float(mapxml.find('bounds').get('maxlon'))
 for anode in nodes:
 	nodedict.update({anode.get('id'):anode})
 
+myRTree = RTree('RTree.so')
+RTreeWays = []
+
+
+
+total = len(ways)
+
 for away in ways:
 	nds = away.findall('nd')
 	highway = 'None'
@@ -46,6 +55,23 @@ for away in ways:
 	#if nds[0].get('ref') != nds[-1].get('ref') :
 	if highway not in roadForMotorBlackSet: 
 		waydict.update({away.get('id'):away})
+		#minx = -1000
+		#miny = -1000
+		#maxx = 1000
+		#maxy = 1000
+		mlat = []
+		mlon = []
+		for anode in away.findall('nd'):
+			refid = anode.get('ref')
+			mlat.append(float(nodedict[refid].get('lat')))
+			mlon.append(float(nodedict[refid].get('lon')))
+
+		wayid = len(RTreeWays)
+		print(wayid,total)
+		RTreeWays.append(away)
+		myRTree.Insert(min(mlon),min(mlat),max(mlon),max(mlat),wayid) 
+
+#myRTree = RTree('RTree.so')
 
 for key, value in waydict.iteritems():
 	mlat = []
@@ -74,16 +100,34 @@ for i in range(len(value)) :
 	if i % 3 == 1 : gpsx.append(float(value[i]))
 	if i % 3 == 2 : gpsy.append(float(value[i]))
 
+
 plt.plot(gpsy,gpsx,'ro')
 plt.plot(gpsy,gpsx,'r')
 
+DrawDict = {}
+print(myRTree.Query(-71.104-0.01,42.37-0.01,-71.104+0.01,42.37+0.01))
+
+for i in myRTree.Query(-71.104-0.01,42.37-0.01,-71.104+0.01,42.37+0.01):
+	v = RTreeWays[i]
+	DrawDict.update({v.get('id'):v})
+
+
+for key, value in DrawDict.iteritems():
+	mlat = []
+	mlon = []
+	for anode in value.findall('nd'):
+		refid = anode.get('ref')
+		mlat.append(float(nodedict[refid].get('lat')))
+		mlon.append(float(nodedict[refid].get('lon')))
+
+	plt.plot(mlon,mlat,linewidth = 2.0)
 
 
 
 plt.show()
 
 
-
+code.interact(local=locals())
 
 
 
