@@ -6,10 +6,11 @@ from MyRTree import RTree
 
 roadForMotorDict = {'motorway','trunk','primary','secondary','tertiary','unclassified','residential','service'}
 
-roadForMotorBlackSet = {'None', 'pedestrian','footway','bridleway','steps','path','sidewalk','cycleway','proposed','construction','bus_stop','crossing','elevator','emergency_access_point','escape','give_way'}
+roadForMotorBlackList = {'None', 'pedestrian','footway','bridleway','steps','path','sidewalk','cycleway','proposed','construction','bus_stop','crossing','elevator','emergency_access_point','escape','give_way'}
 
-#import map from XML
+#import map from XML  
 mapxml = xml.etree.ElementTree.parse('map').getroot()
+
 nodes = mapxml.findall('node')
 ways = mapxml.findall('way')
 relations = mapxml.findall('relation')
@@ -38,6 +39,7 @@ maxlon = float(mapxml.find('bounds').get('maxlon'))
 for anode in nodes:
 	nodedict.update({anode.get('id'):anode})
 
+# Load RTree from shared library
 myRTree = RTree('RTree.so')
 RTreeWays = []
 
@@ -52,13 +54,8 @@ for away in ways:
 		if atag.get('k') == 'highway':
 			highway = atag.get('v')
 		
-	#if nds[0].get('ref') != nds[-1].get('ref') :
-	if highway not in roadForMotorBlackSet: 
+	if highway not in roadForMotorBlackList: 
 		waydict.update({away.get('id'):away})
-		#minx = -1000
-		#miny = -1000
-		#maxx = 1000
-		#maxy = 1000
 		mlat = []
 		mlon = []
 		for anode in away.findall('nd'):
@@ -71,7 +68,6 @@ for away in ways:
 		RTreeWays.append(away)
 		myRTree.Insert(min(mlon),min(mlat),max(mlon),max(mlat),wayid) 
 
-#myRTree = RTree('RTree.so')
 
 for key, value in waydict.iteritems():
 	mlat = []
@@ -89,8 +85,7 @@ plt.axes().set_aspect('equal','datalim')
 #plt.ylim([minlat,maxlat])
 
 
-#Read Route Trace
-
+#Read GPS Trace
 value = open('trace').read().split()
 
 gpsx = []
@@ -104,6 +99,11 @@ for i in range(len(value)) :
 plt.plot(gpsy,gpsx,'ro')
 plt.plot(gpsy,gpsx,'r')
 
+
+
+# Test the RTree
+# Query all the roads in a rectangle
+# Highlight the result
 DrawDict = {}
 print(myRTree.Query(-71.104-0.01,42.37-0.01,-71.104+0.01,42.37+0.01))
 
@@ -121,6 +121,8 @@ for key, value in DrawDict.iteritems():
 		mlon.append(float(nodedict[refid].get('lon')))
 
 	plt.plot(mlon,mlat,linewidth = 2.0)
+
+
 
 
 
